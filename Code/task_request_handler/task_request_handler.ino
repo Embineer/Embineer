@@ -57,13 +57,16 @@ void task_request_handler(void *pvParameters){
   for (;;){
     if(xSemaphoreTake(mutex_car_queue,0) == pdTRUE){
       if( sizeof(request_array[0]) != 0 ){
-      xQueueSendToFront( car_queue,
+      xQueueSendToBack( car_queue,
                          &request_array[0],
                          (TickType_t ) 10 );
       queue_size++;
       shift_array_left(request_array);
       xSemaphoreGive(mutex_car_queue);
       }
+    }
+    else{
+      Serial.println("Car queue is being accessed by another proccess");
     }
     
   }
