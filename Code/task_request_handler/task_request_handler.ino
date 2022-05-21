@@ -1,5 +1,6 @@
 #include <Arduino_FreeRTOS.h>
 #include <queue.h>
+#include <semphr.h>
 
 //Define tasks,queue,variables and functions
 class car {
@@ -18,6 +19,8 @@ void shift_array_left(car *array_name);
 void add_request(car *array_name, car car_object);
 
 QueueHandle_t car_queue;
+SemaphoreHandle_t mutex_car_queue;
+
 
 car request_array [100];
 
@@ -29,6 +32,8 @@ int queue_size = 0;
 void setup() {
   car_queue = xQueueCreate(100, //Queue length
                           sizeof(short) * 10); //Queue item size
+
+  mutex_car_queue = xSemaphoreCreateMutex();
   if(car_queue == NULL){
     //Error handler for when car queue is not created
     Serial.println("ERROR: Car queue not succesfully created");
@@ -50,13 +55,17 @@ void task_request_handler(void *pvParameters){
   (void) pvParameters;
 
   for (;;){
-    if( sizeof(request_array[0]) != 0 ){
+    if(xSemaphoreTake(mutex_car_queue,0) == pdTRUE){
+      if( sizeof(request_array[0]) != 0 ){
       xQueueSendToFront( car_queue,
                          &request_array[0],
                          (TickType_t ) 10 );
       queue_size++;
       shift_array_left(request_array);
+      xSemaphoreGive(mutex_car_queue);
+      }
     }
+    
   }
   
 }
