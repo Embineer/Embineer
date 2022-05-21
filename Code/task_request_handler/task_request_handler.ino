@@ -2,14 +2,28 @@
 #include <queue.h>
 
 //Define tasks,queue,variables and functions
+class car {
+  private:
+
+  public:
+    int Duration;
+    int Allowed;
+    int Time_Arrival;
+    int Leave;
+    
+};
+
 void task_request_handler(void *pvParameters);
-void shift_array_left(car* array_name)
+void shift_array_left(car *array_name);
+void add_request(car *array_name, car car_object);
 
 QueueHandle_t car_queue;
 
 car request_array [100];
 
 int queue_size = 0;
+
+
 
 
 void setup() {
@@ -22,9 +36,9 @@ void setup() {
   
   xTaskCreate(task_request_handler,
               "Handle_Request_From_Car",
-              ?,//Stacksize
+              128,//Stacksize
               NULL,//Parameter
-              ?,//Priority
+              2,//Priority
               NULL);
 
 }
@@ -36,10 +50,10 @@ void task_request_handler(void *pvParameters){
   (void) pvParameters;
 
   for (;;){
-    if( request_array[0] != 0 ){
-      xQueueSendToFront( task_request_handler,
-                         ( void * ) &request_array[0],
-                         (TickType_t ) 10 )
+    if( sizeof(request_array[0]) != 0 ){
+      xQueueSendToFront( car_queue,
+                         &request_array[0],
+                         (TickType_t ) 10 );
       queue_size++;
       shift_array_left(request_array);
     }
@@ -47,10 +61,10 @@ void task_request_handler(void *pvParameters){
   
 }
 
-void shift_array_left(car* array_name){
-  array_name[0] = 0;
-  for(i = 0; i < 100 ;i++){
-    if( array_name[i+1] != 0 ){
+void shift_array_left(car *array_name){
+  delete &array_name[0];
+  for(int i = 0; i < 100 ;i++){
+    if( sizeof(array_name[i+1]) != 0 ){
       array_name[i] = array_name[i +1];
     }
     else{
@@ -61,12 +75,13 @@ void shift_array_left(car* array_name){
   }
 }
 
-void add_request(car* array_name, car car_object){
-  for(i = 0; i < 100 ;i++){
-    if(array_name[i] != 0){
+void add_request(car *array_name, car car_object){
+  for(int i = 0; i < 100 ;i++){
+    if(sizeof(array_name[i]) != 0){
       ;
     }
     else{
       array_name[i] = car_object;
     }
+  }
 }
