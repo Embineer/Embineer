@@ -2,10 +2,11 @@
 #include <Arduino_FreeRTOS.h>
 #include <semphr.h>
 #include <queue.h>
-
+//////////////////////////////////////////////////////// dummy object ////////////////////////////////////////////////////
 //car class to create dummy car//
 class car {
   private:
+
   public:
   car (short Duration, short allowed,short Time_Arrival,short Leave,short S1,short S2,short S3,short S4,short S5,short S6);
   car(); 
@@ -40,8 +41,21 @@ car::car(short duration, short allowed,short time_Arrival,short leave,short s1,s
 car* car1 = new car( 150,2,21,23,11,0,6,0,0,0);// dummy car
 car* car2 = new car( 200,2,21,23,0,0,0,0,7,0);// dummy car
 
+
+car request_array [100];
+
+
+
+//////////////////////////////////////////////////////// the system ////////////////////////////////////////////////////////
+
+
+//queue for car request
+QueueHandle_t car_queue;
+int queue_size = 0;
+
+
 //guard for each critical section in this system
-SemaphoreHandle_t mutexQueue;
+SemaphoreHandle_t mutex_car_queue;
 SemaphoreHandle_t mutex1;
 SemaphoreHandle_t mutex2;
 SemaphoreHandle_t mutex3;
@@ -56,7 +70,7 @@ SemaphoreHandle_t mutex11;
 SemaphoreHandle_t mutex12;
 
 
-//function prototype
+//function prototype for resource manager
 void listesning();
 void choose(car*chosen_car);
 void rearange();
@@ -66,12 +80,16 @@ void reset(car*chosen_car);
 void lock(short resource);
 void unlock(short resource);
 
+//function prototype for request handler
+void task_request_handler(void *pvParameters);
+void shift_array_left(car *array_name);
+void add_request(car *array_name, car car_object);
 
 void setup() {
 
   Serial.begin(1200);
 
-  mutexQueue = xSemaphoreCreateMutex();
+  mutex_car_queue = xSemaphoreCreateMutex();
   mutex1 = xSemaphoreCreateMutex();
   mutex2 = xSemaphoreCreateMutex();
   mutex3 = xSemaphoreCreateMutex();
@@ -86,6 +104,8 @@ void setup() {
   mutex12 = xSemaphoreCreateMutex();
 
   //tasks
+
+  xTaskCreate(task_request_handler,"Handle_Request_From_Car",128,NULL,2,NULL);
   xTaskCreate(resource_manager, "Task1", 128,1,1 , NULL);
   xTaskCreate(resource_manager, "Task2", 128,1,1 , NULL);
   add_request(request_array, car1);
@@ -97,6 +117,59 @@ void setup() {
 
 void loop() {}
 
+//////////////////////////////////////////////////////// car request handler ////////////////////////////////////////////////////////
+
+
+void task_request_handler(void *pvParameters){
+  (void) pvParameters;
+
+  for (;;){
+    if(xSemaphoreTake(mutex_car_queue,0) == pdTRUE){
+      if( sizeof(request_array[0]) != 0 ){
+      xQueueSendToBack( car_queue,
+                         &request_array[0],
+                         (TickType_t ) 10 );
+      queue_size++;
+      shift_array_left(request_array);
+      xSemaphoreGive(mutex_car_queue);
+      }
+    }
+    else{
+      Serial.println("Car queue is being accessed by another proccess");
+    }
+    
+  }
+  
+}
+
+void shift_array_left(car *array_name){
+  delete &array_name[0];
+  for(int i = 0; i < 100 ;i++){
+    if( sizeof(array_name[i+1]) != 0 ){
+      array_name[i] = array_name[i +1];
+    }
+    else{
+      break;
+    }
+    
+    
+  }
+}
+
+void add_request(car *array_name, car car_object){
+  for(int i = 0; i < 100 ;i++){
+    if(sizeof(array_name[i]) != 0){
+      ;
+    }
+    else{
+      array_name[i] = car_object;
+    }
+  }
+}
+
+
+//////////////////////////////////////////////////////// resource access manager ////////////////////////////////////////////////////
+
 void resource_manager(void *pvParameters)
 {
   Serial.println("new"); 
@@ -106,13 +179,13 @@ void resource_manager(void *pvParameters)
   {
     listesning();//check for requesting car on queue
     choose(&car_handler);//take car to handle
-    
     checking(&car_handler);//lock requested resources
     allocate(&car_handler);// give permission to the car to use the resources
     reset(&car_handler);//unlock requested resources
   }
   
 }
+
 
 //check for requesting car on queue
 void listesning()
