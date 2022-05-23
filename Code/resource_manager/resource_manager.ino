@@ -1,12 +1,15 @@
 
 #include <Arduino_FreeRTOS.h>
 #include <semphr.h>
-//car class to create dummy car
+#include <queue.h>
+
+//car class to create dummy car//
 class car {
   private:
 
   public:
   car (short Duration, short allowed,short Time_Arrival,short Leave,short S1,short S2,short S3,short S4,short S5,short S6);
+  car(); 
     short Duration;
     short Allowed;
     short Time_Arrival;
@@ -19,7 +22,7 @@ class car {
     short S6;
     
 };
-//car constructor
+//car constructor complete
 car::car(short duration, short allowed,short time_Arrival,short leave,short s1,short s2,short s3,short s4,short s5,short s6)
 {
   Duration=duration;
@@ -33,8 +36,18 @@ car::car(short duration, short allowed,short time_Arrival,short leave,short s1,s
   S5=s5;
   S6=s6;  
 }
-car* queue[100]; //dudi
+//Car Constructor Empty
+car::car(){}
 
+
+
+//Hadi Declarations//
+QueueHandle_t car_queue;
+car request_array [100];
+int queue_size = 0;
+//Hadi Declarations//
+
+//car class to create dummy car//
 car* car1 = new car( 150,2,21,23,11,0,6,0,0,0);// dummy car
 car* car2 = new car( 200,2,21,23,0,0,0,0,7,0);// dummy car
 
@@ -64,6 +77,12 @@ void reset(car*chosen_car);
 void lock(short resource);
 void unlock(short resource);
 
+//Fx Hadi//
+void task_request_handler(void *pvParameters);
+void shift_array_left(car *array_name);
+void add_request(car *array_name, car car_object);
+//Fx Hadi//
+
 
 void setup() {
 
@@ -85,10 +104,23 @@ void setup() {
 
   //tasks
   xTaskCreate(resource_manager, "Task1", 128,1,1 , NULL);
-  xTaskCreate(resource_manager, "Task2", 128,1,1 , NULL);  
+  xTaskCreate(resource_manager, "Task2", 128,1,1 , NULL);
 
-  queue[0] = car1;//dudi
-  queue[1] = car2;//dudi
+  //Setup Hadi//
+  xTaskCreate(task_request_handler,
+              "Handle_Request_From_Car",
+              128,//Stacksize
+              NULL,//Parameter
+              2,//Priority
+              NULL);
+  //Create Queue
+  car_queue = xQueueCreate(100, //Queue length
+                          sizeof(short) * 10); //Queue item size
+  //Setup Hadi//
+  add_request(request_array, car1);
+  add_request(request_array, car2);
+//  queue[0] = car1;//dudi
+//  queue[1] = car2;//dudi
 
 }
 
@@ -111,16 +143,38 @@ void resource_manager(void *pvParameters)
   
 }
 
+void task_request_handler(void *pvParameters){
+  (void) pvParameters;
+
+  for (;;){
+    if(xSemaphoreTake(mutexQueue,0) == pdTRUE){
+      if( sizeof(request_array[0]) != 0 ){
+      xQueueSendToBack( car_queue,
+                         &request_array[0],
+                         (TickType_t ) 10 );
+      queue_size++;
+      shift_array_left(request_array);
+      xSemaphoreGive(mutexQueue);
+      }
+    }
+    else{
+      Serial.println("Car queue is being accessed by another proccess");
+    }
+    
+  }
+  
+}
+
 //check for requesting car on queue
 void listesning()
 {
-  for(; queue[0] == 0;){}
+  for(; queue[0] == 0;){} // Check first element queue kosong ke tak
 }
 //take a car from queue to handle the car
 void choose(car *chosen_car)
 {
   while(xSemaphoreTake(mutexQueue, 10)!= pdTRUE){};
-  *chosen_car = *queue[0];
+//  *chosen_car = *queue[0]; //extract first element into chosen car
   rearange();// rearrange the queue
   while(xSemaphoreGive(mutexQueue)!= pdTRUE){};  
 }
@@ -130,7 +184,7 @@ void rearange()
 {
   for(int i =0 ; i<100;i++)
   {
-      queue[i]=queue[i+1];
+//      queue[i]=queue[i+1]; //Shift_queue_left
   }    
 }
 
@@ -252,3 +306,30 @@ void unlock(short resource)
   }
 }
 
+//Fx Hadi//
+
+void shift_array_left(car *array_name){
+  delete &array_name[0];
+  for(int i = 0; i < 100 ;i++){
+    if( sizeof(array_name[i+1]) != 0 ){
+      array_name[i] = array_name[i +1];
+    }
+    else{
+      break;
+    }
+    
+    
+  }
+}
+
+void add_request(car *array_name, car car_object){
+  for(int i = 0; i < 100 ;i++){
+    if(sizeof(array_name[i]) != 0){
+      ;
+    }
+    else{
+      array_name[i] = car_object;
+    }
+  }
+}
+//Fx Hadi//
