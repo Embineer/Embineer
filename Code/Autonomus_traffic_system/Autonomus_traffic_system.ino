@@ -36,10 +36,14 @@ car::car(short duration, short allowed,short time_Arrival,short leave,short s1,s
   S5=s5;
   S6=s6;  
 }
+car::car()
+{
+
+}
 
 //car class to create dummy car//
 car* car1 = new car( 150,2,21,23,11,0,6,0,0,0);// dummy car
-car* car2 = new car( 200,2,21,23,0,0,0,0,7,0);// dummy car
+car car2 = car( 200,2,21,23,0,0,0,0,7,0);// dummy car
 
 
 car request_array [100];
@@ -50,7 +54,7 @@ car request_array [100];
 
 
 //queue for car request
-QueueHandle_t car_queue;
+QueueHandle_t car_queue = xQueueCreate(100,sizeof(car));
 int queue_size = 0;
 
 
@@ -69,6 +73,7 @@ SemaphoreHandle_t mutex10;
 SemaphoreHandle_t mutex11;
 SemaphoreHandle_t mutex12;
 
+ 
 
 //function prototype for resource manager
 void listesning();
@@ -83,11 +88,13 @@ void unlock(short resource);
 //function prototype for request handler
 void task_request_handler(void *pvParameters);
 void shift_array_left(car *array_name);
-void add_request(car *array_name, car car_object);
+void add_request(car car_object);
 
 void setup() {
 
   Serial.begin(1200);
+
+ 
 
   mutex_car_queue = xSemaphoreCreateMutex();
   mutex1 = xSemaphoreCreateMutex();
@@ -105,11 +112,14 @@ void setup() {
 
   //tasks
 
-  xTaskCreate(task_request_handler,"Handle_Request_From_Car",128,NULL,2,NULL);
+  //  xTaskCreate(task_request_handler,"Handle_Request_From_Car",128,NULL,1,NULL);
   xTaskCreate(resource_manager, "Task1", 128,1,1 , NULL);
   xTaskCreate(resource_manager, "Task2", 128,1,1 , NULL);
-  add_request(request_array, car1);
-  add_request(request_array, car2);
+
+  xQueueSendToBack( car_queue,(void*)&car1, (TickType_t ) 0 );
+  xQueueSendToBack( car_queue,(void*)&car2, (TickType_t ) 0 );
+  // add_request(car1);
+  // add_request(car2);
 //  queue[0] = car1;//dudi
 //  queue[1] = car2;//dudi
 
@@ -126,16 +136,18 @@ void task_request_handler(void *pvParameters){
   for (;;){
     if(xSemaphoreTake(mutex_car_queue,0) == pdTRUE){
       if( sizeof(request_array[0]) != 0 ){
+          // Serial.println("masuk task handler");
       xQueueSendToBack( car_queue,
                          &request_array[0],
-                         (TickType_t ) 10 );
+                         (TickType_t ) 0 );
+                     
       queue_size++;
       shift_array_left(request_array);
       xSemaphoreGive(mutex_car_queue);
       }
+      // Serial.println(uxQueueMessagesWaiting( car_queue));
     }
-    else{
-      Serial.println("Car queue is being accessed by another proccess");
+    else{Serial.println("Car queue is being accessed by another proccess");
     }
     
   }
@@ -156,13 +168,13 @@ void shift_array_left(car *array_name){
   }
 }
 
-void add_request(car *array_name, car car_object){
+void add_request(car car_object){
   for(int i = 0; i < 100 ;i++){
-    if(sizeof(array_name[i]) != 0){
+    if(sizeof(request_array[i]) != 0){
       ;
     }
     else{
-      array_name[i] = car_object;
+      request_array[i] = car_object;
     }
   }
 }
@@ -177,8 +189,13 @@ void resource_manager(void *pvParameters)
   car car_handler = car( 0,0,0,0,0,0,0,0,0,0);
   for (;;)
   {
-    listesning();//check for requesting car on queue
+    Serial.println("list ");
+    listesning();//check for requesting car on queue 
+    Serial.print(uxQueueMessagesWaiting( car_queue));
+    Serial.println("list ");
+    // Serial.println(car_handler.Duration);
     choose(&car_handler);//take car to handle
+    Serial.println(car_handler.Duration);
     checking(&car_handler);//lock requested resources
     allocate(&car_handler);// give permission to the car to use the resources
     reset(&car_handler);//unlock requested resources
@@ -190,31 +207,23 @@ void resource_manager(void *pvParameters)
 //check for requesting car on queue
 void listesning()
 {
-  for(; queue[0] == 0;){} // Check first element queue kosong ke tak
+  for(;  uxQueueMessagesWaiting( car_queue)==0;){
+  }
 }
 //take a car from queue to handle the car
 void choose(car *chosen_car)
 {
-  while(xSemaphoreTake(mutexQueue, 10)!= pdTRUE){};
-//  *chosen_car = *queue[0]; //extract first element into chosen car
-  rearange();// rearrange the queue
-  while(xSemaphoreGive(mutexQueue)!= pdTRUE){};  
-}
-
-// remove the taken car from queue and rearrange the queue 
-void rearange()
-{
-  for(int i =0 ; i<100;i++)
-  {
-//      queue[i]=queue[i+1]; //Shift_queue_left
-  }    
+ 
+  while(xSemaphoreTake(mutex_car_queue, 10)!= pdTRUE){};
+  xQueueReceive( car_queue,&(chosen_car),( TickType_t ) 0 ) ;
+  while(xSemaphoreGive(mutex_car_queue)!= pdTRUE){};  
 }
 
 //lock requested resources
 void checking(car *chosen_car)
 {
   
-
+  Serial.println("checking..... ");
     if(chosen_car->S1!=0)
     {
         lock(chosen_car->S1);

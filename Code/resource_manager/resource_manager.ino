@@ -3,13 +3,16 @@
 #include <semphr.h>
 #include <queue.h>
 
+#define QUEUE_SIZE 10
+#define BUTTON 13
+
 // car class to create dummy car
 class car {
   private:
   public:
   car (short Duration, short allowed,short Time_Arrival,short Leave,short S1,short S2,short S3,short S4,short S5,short S6);
+    short ID;
     short Duration;
-    short Allowed;
     short Time_Arrival;
     short Leave;
     short S1;
@@ -17,16 +20,13 @@ class car {
     short S3;
     short S4;
     short S5;
-    short S6;
-
-
-    
+    short S6; 
 };
 // car constructor complete
-car::car(short duration, short allowed,short time_Arrival,short leave,short s1,short s2,short s3,short s4,short s5,short s6)
+car::car(short id, short duration,short time_Arrival,short leave,short s1,short s2,short s3,short s4,short s5,short s6)
 {
+  ID = id;
   Duration=duration;
-  Allowed=allowed;
   Time_Arrival=time_Arrival;
   Leave=leave;
   S1=s1;
@@ -38,14 +38,28 @@ car::car(short duration, short allowed,short time_Arrival,short leave,short s1,s
 }
 
 // car class to create dummy car
-car* car1 = new car( 150,2,21,23,11,0,6,0,0,0);// dummy car
-car* car2 = new car( 200,2,21,23,0,0,8,0,7,10);// dummy car
+car* car1 = new car( 1,2,21,23,11,0,6,0,0,0);// dummy car
+car* car2 = new car( 2,2,21,23,0,0,8,0,7,10);// dummy car
+// car* car3 = new car( 3,2,21,23,11,0,6,0,0,0);// dummy car
+/*
+car* car4 = new car( 4,2,21,23,0,0,8,0,7,10);// dummy car
+car* car5 = new car( 5,2,21,23,11,0,6,0,0,0);// dummy car
+car* car6 = new car( 6,2,21,23,0,0,8,0,7,10);// dummy car
+car* car7 = new car( 7,2,21,23,0,0,8,0,7,10);// dummy car
+car* car8 = new car( 8,2,21,23,11,0,6,0,0,0);// dummy car
+car* car9 = new car( 9,2,21,23,0,0,8,0,7,10);// dummy car
+car* car10 = new car( 10,2,21,23,0,0,8,0,7,10);// dummy car
+car* car11 = new car( 11,2,21,23,11,0,6,0,0,0);// dummy car
+car* car12 = new car( 12,2,21,23,0,0,8,0,7,10);// dummy car
+car* car13 = new car( 13,2,21,23,0,0,8,0,7,10);// dummy car
+car* car14 = new car( 14,2,21,23,11,0,6,0,0,0);// dummy car
+car* car15 = new car( 15,2,21,23,0,0,8,0,7,10);// dummy car
+*/
 
 // car queue
-car*queue[100];
 QueueHandle_t car_queue;
 
-// guard for each critical section in this system
+// guard for car queue and each critical section in this system
 SemaphoreHandle_t mutexQueue;
 SemaphoreHandle_t mutex1;
 SemaphoreHandle_t mutex2;
@@ -60,22 +74,23 @@ SemaphoreHandle_t mutex10;
 SemaphoreHandle_t mutex11;
 SemaphoreHandle_t mutex12;
 
-
-// function prototype
+// function prototype 
 void listesning();
 void choose(car*chosen_car);
-void rearange();
 void checking(car*chosen_car);
 void allocate(car*chosen_car);
 void reset(car*chosen_car);
 void lock(short resource);
 void unlock(short resource);
 
+// guard for executing dummy car
+int filled = 0;
 
 void setup() {
 
   Serial.begin(1200);
 
+  // guard for queue and each resources
   mutexQueue = xSemaphoreCreateMutex();
   mutex1 = xSemaphoreCreateMutex();
   mutex2 = xSemaphoreCreateMutex();
@@ -93,189 +108,146 @@ void setup() {
   // tasks
   xTaskCreate(resource_manager, "Task1", 128,1,1 , NULL);
   xTaskCreate(resource_manager, "Task2", 128,1,1 , NULL);
+  //xTaskCreate(resource_manager, "Task3", 1280,1,1 , NULL);
+  // xTaskCreate(resource_manager, "Task4", 1280,1,1 , NULL);
 
   // initialize car queue
   car_queue = xQueueCreate(10, sizeof(car*));
 
-  // put dummy car in queue
-  // queue[0] = car1;
-  // queue[1] = car2;
-  
-
-
+  // button for simulating car request
+  pinMode(13, INPUT);
+  delay(10);
 }
 
 void loop() {
   // put dummy car in queue
-  int filled = 0;
-  while(filled==0)
-  {
-    
+  
+  while(filled==0){
     xQueueSendToBack(car_queue, (void*)&car2, 1);
     xQueueSendToBack(car_queue, (void*)&car1, 1);
+    // xQueueSendToBack(car_queue, (void*)&car3, 1);
+    /*
+    xQueueSendToBack(car_queue, (void*)&car4, 1);
+    xQueueSendToBack(car_queue, (void*)&car5, 1);
+    xQueueSendToBack(car_queue, (void*)&car6, 1);
+    xQueueSendToBack(car_queue, (void*)&car7, 1);
+    xQueueSendToBack(car_queue, (void*)&car8, 1);
+    xQueueSendToBack(car_queue, (void*)&car9, 1);
+    xQueueSendToBack(car_queue, (void*)&car10, 1);
+    xQueueSendToBack(car_queue, (void*)&car11, 1);
+    xQueueSendToBack(car_queue, (void*)&car12, 1);
+    xQueueSendToBack(car_queue, (void*)&car13, 1);
+    xQueueSendToBack(car_queue, (void*)&car14, 1);
+    xQueueSendToBack(car_queue, (void*)&car15, 1);
+    */
     filled = 1;
   }
+  if(digitalRead(13)== 1){
+    filled==0;
+  }
+  delay(100);
 }
 
-void resource_manager(void *pvParameters)
-{
+void resource_manager(void *pvParameters){
   (void) pvParameters;
   Serial.println("new"); 
   car car_handler = car( 0,0,0,0,0,0,0,0,0,0);
   for (;;)
   {
-    Serial.println(car_handler.Duration);
     listesning();// check for requesting car on queue
+    Serial.println("pass listening");
     choose(&car_handler);// take car to handle
-    Serial.println(car_handler.Duration);
+    Serial.println("pass choose");
     checking(&car_handler);// lock requested resources
     allocate(&car_handler);// give permission to the car to use the resources
     reset(&car_handler);// unlock requested resources
-
-    
-    
-    car_handler.Duration =0;
-    car_handler.Allowed =0;
-    car_handler.Time_Arrival =0;
-    car_handler.Leave =0;
-    car_handler.S1 =0;
-    car_handler.S2 =0;
-    car_handler.S3 =0;
-    car_handler.S4 =0;
-    car_handler.S5 =0;
-    car_handler.S6 =0;
-
-    Serial.println(car_handler.Duration);
+    delay(10);
   }
-  
 }
 
 // check for requesting car on queue
-void listesning()
-{
+void listesning(){
   int car_exist = 0;
-  while(car_exist == 0)
-  {
-    if(car_queue != 0)
-    {
+  while(car_exist == 0){
+    if(car_queue != 0){
       car_exist = 1;
     }    
   }
-  // for(; queue[0] == 0;){} 
-
 }
 
 // take a car from queue to handle the car
-void choose(car *chosen_car)
-{
-  car* choosing_car;
+void choose(car *chosen_car){
   while(xSemaphoreTake(mutexQueue, 10)!= pdTRUE){};
-
-  xQueueReceive( car_queue, &( choosing_car ), ( TickType_t ) 10 );
-  *chosen_car=*choosing_car;
-
-  // *chosen_car = *queue[0]; 
-  // rearange();// rearrange the queue
+  xQueueReceive( car_queue, chosen_car, ( TickType_t ) 10 );
   while(xSemaphoreGive(mutexQueue)!= pdTRUE){}; 
 }
 
-// remove the taken car from queue and rearrange the queue 
-void rearange()
-{
-  for(int i =0 ; i<100;i++)
-  {
-    queue[i]=queue[i+1]; 
-  }    
-}
-
 // lock requested resources
-void checking(car *chosen_car)
-{
-  
-
-    if(chosen_car->S1!=0)
-    {
+void checking(car *chosen_car){
+    if(chosen_car->S1!=0){
         lock(chosen_car->S1);
     }
-    if(chosen_car->S2!=0)
-    {
+    if(chosen_car->S2!=0){
         lock(chosen_car->S2);
     }
-    if(chosen_car->S3!=0)
-    {
+    if(chosen_car->S3!=0){
         lock(chosen_car->S3);
     }
-    if(chosen_car->S4!=0)
-    {
+    if(chosen_car->S4!=0){
         lock(chosen_car->S4);
     }
-    if(chosen_car->S5!=0)
-    {
+    if(chosen_car->S5!=0){
       lock(chosen_car->S5);
     }
-    if(chosen_car->S6!=0)
-    {
+    if(chosen_car->S6!=0){
       lock(chosen_car->S6);
     }
 }
     
-
-void lock(short resource)
-{
-  int sumber = int(resource);
-  
-  switch (resource)
-  {
-    case 1 :  while(xSemaphoreTake(mutex1, 10)!= pdTRUE); break;
-    case 2 :  while(xSemaphoreTake(mutex2, 10)!= pdTRUE); break;
-    case 3 :  while(xSemaphoreTake(mutex3, 10)!= pdTRUE); break;
-    case 4 :  while(xSemaphoreTake(mutex4, 10)!= pdTRUE); break;
-    case 5 :  while(xSemaphoreTake(mutex5, 10)!= pdTRUE); break;
+void lock(short resource){
+  switch (resource){
+    case 1 :  while(xSemaphoreTake(mutex1, 10)!= pdTRUE);Serial.println("Source 1 locked"); break;
+    case 2 :  while(xSemaphoreTake(mutex2, 10)!= pdTRUE);Serial.println("Source 2 locked"); break;
+    case 3 :  while(xSemaphoreTake(mutex3, 10)!= pdTRUE);Serial.println("Source 3 locked"); break;
+    case 4 :  while(xSemaphoreTake(mutex4, 10)!= pdTRUE);Serial.println("Source 4 locked"); break;
+    case 5 :  while(xSemaphoreTake(mutex5, 10)!= pdTRUE);Serial.println("Source 5 locked"); break;
     case 6 :  while(xSemaphoreTake(mutex6, 10)!= pdTRUE);Serial.println("Source 6 locked"); break;
     case 7 :  while(xSemaphoreTake(mutex7, 10)!= pdTRUE);Serial.println("Source 7 locked"); break;
     case 8 :  while(xSemaphoreTake(mutex8, 10)!= pdTRUE);Serial.println("Source 8 locked"); break;
     case 9 :  while(xSemaphoreTake(mutex9, 10)!= pdTRUE);Serial.println("Source 9 locked"); break;
     case 10 :  while(xSemaphoreTake(mutex10, 10)!= pdTRUE)Serial.println("Source 10 locked"); break;
     case 11 :  while(xSemaphoreTake(mutex11, 10)!= pdTRUE);Serial.println("source 11 locked"); break;
-    case 12 :  while(xSemaphoreTake(mutex12, 10)!= pdTRUE); break;
+    case 12 :  while(xSemaphoreTake(mutex12, 10)!= pdTRUE);Serial.println("Source 12 locked"); break;
   }
 }
 // give permission to the car to use the resources
-void allocate(car*choosen_car)
-{
+void allocate(car*choosen_car){
   delay(((choosen_car->Duration)*30)/ portTICK_PERIOD_MS);
 }
 
 // unlock requested resources
-void reset(car * chosen_car)
-{
-    if(chosen_car->S1!=0)
-    {
+void reset(car * chosen_car){
+    if(chosen_car->S1!=0){
         unlock(chosen_car->S1);
     }
-    if(chosen_car->S2!=0)
-    {
+    if(chosen_car->S2!=0){
         unlock(chosen_car->S2);
     }
-    if(chosen_car->S3!=0)
-    {
+    if(chosen_car->S3!=0){
         unlock(chosen_car->S3);
     }
-    if(chosen_car->S4!=0)
-    {
+    if(chosen_car->S4!=0){
         unlock(chosen_car->S4);
     }
-    if(chosen_car->S5!=0)
-    {
+    if(chosen_car->S5!=0){
       unlock(chosen_car->S5);
     }
-    if(chosen_car->S6!=0)
-    {
+    if(chosen_car->S6!=0){
       unlock(chosen_car->S6);
     }
-    
+    // reser car attribute to copy new car artibute
+    chosen_car->ID =0;
     chosen_car->Duration =0;
-    chosen_car->Allowed =0;
     chosen_car->Time_Arrival =0;
     chosen_car->Leave =0;
     chosen_car->S1 =0;
@@ -286,23 +258,19 @@ void reset(car * chosen_car)
     chosen_car->S6 =0;
 }
 
-
-void unlock(short resource)
-{
-  switch (int(resource))
-  {
-    case 1 :  while(xSemaphoreGive(mutex1)!= pdTRUE); break;
-    case 2 :  while(xSemaphoreGive(mutex2)!= pdTRUE); break;
-    case 3 :  while(xSemaphoreGive(mutex3)!= pdTRUE); break;
-    case 4 :  while(xSemaphoreGive(mutex4)!= pdTRUE); break;
-    case 5 :  while(xSemaphoreGive(mutex5)!= pdTRUE); break;
+void unlock(short resource){
+  switch (int(resource)){
+    case 1 :  while(xSemaphoreGive(mutex1)!= pdTRUE);Serial.println("source 1 unlocked"); break;
+    case 2 :  while(xSemaphoreGive(mutex2)!= pdTRUE);Serial.println("source 2 unlocked"); break;
+    case 3 :  while(xSemaphoreGive(mutex3)!= pdTRUE);Serial.println("source 3 unlocked"); break;
+    case 4 :  while(xSemaphoreGive(mutex4)!= pdTRUE);Serial.println("source 4 unlocked"); break;
+    case 5 :  while(xSemaphoreGive(mutex5)!= pdTRUE);Serial.println("source 5 unlocked"); break;
     case 6 :  while(xSemaphoreGive(mutex6)!= pdTRUE);Serial.println("source 6 unlocked"); break;
     case 7 :  while(xSemaphoreGive(mutex7)!= pdTRUE);Serial.println("source 7 unlocked"); break;
-    case 8 :  while(xSemaphoreGive(mutex8)!= pdTRUE); break;
-    case 9 :  while(xSemaphoreGive(mutex9)!= pdTRUE); break;
-    case 10 :  while(xSemaphoreGive(mutex10)!= pdTRUE); break;
+    case 8 :  while(xSemaphoreGive(mutex8)!= pdTRUE);Serial.println("source 8 unlocked"); break;
+    case 9 :  while(xSemaphoreGive(mutex9)!= pdTRUE);Serial.println("source 9 unlocked"); break;
+    case 10 :  while(xSemaphoreGive(mutex10)!= pdTRUE);Serial.println("source 10 unlocked"); break;
     case 11 :  while(xSemaphoreGive(mutex11)!= pdTRUE);Serial.println("source 11 unlocked"); break;
-    case 12 :  while(xSemaphoreGive(mutex12)!= pdTRUE); break;
-
+    case 12 :  while(xSemaphoreGive(mutex12)!= pdTRUE);Serial.println("source 12 unlocked"); break;
   }
 }
