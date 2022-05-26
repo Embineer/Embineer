@@ -49,7 +49,7 @@ car::car(short duration, short allowed,short time_Arrival,short leave,short s1,s
   S5=s5;
   S6=s6;  
 }
-
+//Constructor for request_array
 car::car()
 {
 }
@@ -57,6 +57,8 @@ car::car()
 //car class to create dummy car//
 car* car1 = new car( 150,2,21,23,11,0,6,0,0,0);// dummy car
 car* car2 = new car( 200,2,21,23,0,0,0,0,7,0);// dummy car
+car* car3 = new car( 150,2,21,23,11,0,6,0,0,0);// dummy car
+car* car4 = new car( 200,2,21,23,0,0,0,0,7,0);// dummy car
 
 
 car request_array [100];
@@ -108,6 +110,8 @@ void setup() {
   Serial.begin(1200);
   request_array[0]= *car1;
   request_array[1]= *car2;
+  request_array[2]= *car3;
+  request_array[3]= *car4;
 
   car_queue = xQueueCreate(100, //Queue length
                           sizeof(short) * 10); //Queue item size
@@ -279,18 +283,18 @@ void lock(short resource)
   
   switch (resource)
   {
-    case 1 :  while(xSemaphoreTake(mutex1, 10)!= pdTRUE); break;
-    case 2 :  while(xSemaphoreTake(mutex2, 10)!= pdTRUE); break;
-    case 3 :  while(xSemaphoreTake(mutex3, 10)!= pdTRUE); break;
-    case 4 :  while(xSemaphoreTake(mutex4, 10)!= pdTRUE); break;
-    case 5 :  while(xSemaphoreTake(mutex5, 10)!= pdTRUE); break;
+    case 1 :  while(xSemaphoreTake(mutex1, 10)!= pdTRUE);Serial.println("Source 1 locked"); break;
+    case 2 :  while(xSemaphoreTake(mutex2, 10)!= pdTRUE);Serial.println("Source 2 locked"); break;
+    case 3 :  while(xSemaphoreTake(mutex3, 10)!= pdTRUE);Serial.println("Source 3 locked"); break;
+    case 4 :  while(xSemaphoreTake(mutex4, 10)!= pdTRUE);Serial.println("Source 4 locked"); break;
+    case 5 :  while(xSemaphoreTake(mutex5, 10)!= pdTRUE);Serial.println("Source 5 locked"); break;
     case 6 :  while(xSemaphoreTake(mutex6, 10)!= pdTRUE);Serial.println("Source 6 locked"); break;
     case 7 :  while(xSemaphoreTake(mutex7, 10)!= pdTRUE);Serial.println("Source 7 locked"); break;
-    case 8 :  while(xSemaphoreTake(mutex8, 10)!= pdTRUE); break;
-    case 9 :  while(xSemaphoreTake(mutex9, 10)!= pdTRUE); break;
-    case 10 :  while(xSemaphoreTake(mutex10, 10)!= pdTRUE); break;
+    case 8 :  while(xSemaphoreTake(mutex8, 10)!= pdTRUE);Serial.println("Source 8 locked"); break;
+    case 9 :  while(xSemaphoreTake(mutex9, 10)!= pdTRUE);Serial.println("Source 9 locked"); break;
+    case 10 :  while(xSemaphoreTake(mutex10, 10)!= pdTRUE);Serial.println("Source 10 locked"); break;
     case 11 :  while(xSemaphoreTake(mutex11, 10)!= pdTRUE);Serial.println("source 11 locked"); break;
-    case 12 :  while(xSemaphoreTake(mutex12, 10)!= pdTRUE); break;
+    case 12 :  while(xSemaphoreTake(mutex12, 10)!= pdTRUE);Serial.println("Source 12 locked"); break;
   }
 }
 // give permission to the car to use the resources
@@ -343,18 +347,18 @@ void unlock(short resource)
 {
   switch (int(resource))
   {
-    case 1 :  while(xSemaphoreGive(mutex1)!= pdTRUE); break;
-    case 2 :  while(xSemaphoreGive(mutex2)!= pdTRUE); break;
-    case 3 :  while(xSemaphoreGive(mutex3)!= pdTRUE); break;
-    case 4 :  while(xSemaphoreGive(mutex4)!= pdTRUE); break;
-    case 5 :  while(xSemaphoreGive(mutex5)!= pdTRUE); break;
+    case 1 :  while(xSemaphoreGive(mutex1)!= pdTRUE);Serial.println("source 1 unlocked"); break;
+    case 2 :  while(xSemaphoreGive(mutex2)!= pdTRUE);Serial.println("source 2 unlocked"); break;
+    case 3 :  while(xSemaphoreGive(mutex3)!= pdTRUE);Serial.println("source 3 unlocked"); break;
+    case 4 :  while(xSemaphoreGive(mutex4)!= pdTRUE);Serial.println("source 4 unlocked"); break;
+    case 5 :  while(xSemaphoreGive(mutex5)!= pdTRUE);Serial.println("source 5 unlocked"); break;
     case 6 :  while(xSemaphoreGive(mutex6)!= pdTRUE);Serial.println("source 6 unlocked"); break;
     case 7 :  while(xSemaphoreGive(mutex7)!= pdTRUE);Serial.println("source 7 unlocked"); break;
-    case 8 :  while(xSemaphoreGive(mutex8)!= pdTRUE); break;
-    case 9 :  while(xSemaphoreGive(mutex9)!= pdTRUE); break;
-    case 10 :  while(xSemaphoreGive(mutex10)!= pdTRUE); break;
+    case 8 :  while(xSemaphoreGive(mutex8)!= pdTRUE);Serial.println("source 8 unlocked"); break;
+    case 9 :  while(xSemaphoreGive(mutex9)!= pdTRUE);Serial.println("source 9 unlocked"); break;
+    case 10 :  while(xSemaphoreGive(mutex10)!= pdTRUE);Serial.println("source 10 unlocked"); break;
     case 11 :  while(xSemaphoreGive(mutex11)!= pdTRUE);Serial.println("source 11 unlocked"); break;
-    case 12 :  while(xSemaphoreGive(mutex12)!= pdTRUE); break;
+    case 12 :  while(xSemaphoreGive(mutex12)!= pdTRUE);Serial.println("source 12 unlocked"); break;
 
   }
 }
