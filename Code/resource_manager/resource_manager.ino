@@ -4,13 +4,13 @@
 
 #define QUEUE_SIZE 100
 #define STACK_SIZE 128
-#define BUTTON 13
+#define BUTTON 12
 
 // car class to create dummy car
 class car {
   private:
   public:
-  car (short Duration, short allowed,short Time_Arrival,short Leave,short S1,short S2,short S3,short S4,short S5,short S6);
+    car (short Duration, short allowed,short Time_Arrival,short Leave,short S1,short S2,short S3,short S4,short S5,short S6);
     short ID;
     short Duration;
     short Time_Arrival;
@@ -20,11 +20,11 @@ class car {
     short S3;
     short S4;
     short S5;
-    short S6; 
+    short S6;
+    void reset(); 
 };
-// car constructor complete
-car::car(short id, short duration,short time_Arrival,short leave,short s1,short s2,short s3,short s4,short s5,short s6)
-{
+// car constructor 
+car::car(short id, short duration,short time_Arrival,short leave,short s1,short s2,short s3,short s4,short s5,short s6){
   ID = id;
   Duration=duration;
   Time_Arrival=time_Arrival;
@@ -35,6 +35,19 @@ car::car(short id, short duration,short time_Arrival,short leave,short s1,short 
   S4=s4;
   S5=s5;
   S6=s6;  
+}
+
+void car::reset(){
+  ID=0;
+  Duration=0;
+  Time_Arrival=0;
+  Leave=0;
+  S1=0;
+  S2=0;
+  S3=0;
+  S4=0;
+  S5=0;
+  S6=0; 
 }
 
 // car class to create dummy car
@@ -110,31 +123,23 @@ void setup() {
   xTaskCreate(resource_manager, "Task2", STACK_SIZE,1,1 , 0);
   xTaskCreate(resource_manager, "Task3", STACK_SIZE,1,1 , 0);
   xTaskCreate(resource_manager, "Task4", STACK_SIZE,1,1 , 0);
+  xTaskCreate(addRequest, "addRequest", STACK_SIZE,1,1 , 0);
 
   // put dummy car in queue
-  xQueueSendToBack(car_queue, (void*)&car2, 1);
-  xQueueSendToBack(car_queue, (void*)&car1, 1);
-  xQueueSendToBack(car_queue, (void*)&car3, 1);
-  xQueueSendToBack(car_queue, (void*)&car4, 1);
-  xQueueSendToBack(car_queue, (void*)&car5, 1);
-  xQueueSendToBack(car_queue, (void*)&car6, 1);
-  xQueueSendToBack(car_queue, (void*)&car7, 1);
-  xQueueSendToBack(car_queue, (void*)&car8, 1);
-  xQueueSendToBack(car_queue, (void*)&car9, 1);
-  xQueueSendToBack(car_queue, (void*)&car10, 1);
-  xQueueSendToBack(car_queue, (void*)&car11, 1);
-  xQueueSendToBack(car_queue, (void*)&car12, 1);
-  xQueueSendToBack(car_queue, (void*)&car13, 1);
-  xQueueSendToBack(car_queue, (void*)&car14, 1);
-  xQueueSendToBack(car_queue, (void*)&car15, 1);
-  xQueueSendToBack(car_queue, (void*)&car16, 1);
+  
 
   // guard to add more car into queue
   pinMode(BUTTON,INPUT);
 }
 
-void loop() {
-  if(digitalRead(BUTTON) == 1){
+void loop(){
+}
+
+void addRequest() {
+  for(;;){
+    while(!digitalRead(BUTTON)){
+    }
+    Serial.println("added");
     xQueueSendToBack(car_queue, (void*)&car2, 1);
     xQueueSendToBack(car_queue, (void*)&car1, 1);
     xQueueSendToBack(car_queue, (void*)&car3, 1);
@@ -151,6 +156,8 @@ void loop() {
     xQueueSendToBack(car_queue, (void*)&car14, 1);
     xQueueSendToBack(car_queue, (void*)&car15, 1);
     xQueueSendToBack(car_queue, (void*)&car16, 1);
+    
+    vTaskDelay(500 / portTICK_PERIOD_MS);
   }
 }
 
@@ -232,35 +239,26 @@ void allocate(car*choosen_car){
 
 // unlock requested resources
 void reset(car * chosen_car){
-    if(chosen_car->S1!=0){
-        unlock(chosen_car->S1);
-    }
-    if(chosen_car->S2!=0){
-        unlock(chosen_car->S2);
-    }
-    if(chosen_car->S3!=0){
-        unlock(chosen_car->S3);
-    }
-    if(chosen_car->S4!=0){
-        unlock(chosen_car->S4);
-    }
-    if(chosen_car->S5!=0){
-      unlock(chosen_car->S5);
-    }
-    if(chosen_car->S6!=0){
-      unlock(chosen_car->S6);
-    }
-    // reser car attribute to copy new car artibute
-    chosen_car->ID =0;
-    chosen_car->Duration =0;
-    chosen_car->Time_Arrival =0;
-    chosen_car->Leave =0;
-    chosen_car->S1 =0;
-    chosen_car->S2 =0;
-    chosen_car->S3 =0;
-    chosen_car->S4 =0;
-    chosen_car->S5 =0;
-    chosen_car->S6 =0;
+  if(chosen_car->S1!=0){
+      unlock(chosen_car->S1);
+  }
+  if(chosen_car->S2!=0){
+      unlock(chosen_car->S2);
+  }
+  if(chosen_car->S3!=0){
+      unlock(chosen_car->S3);
+  }
+  if(chosen_car->S4!=0){
+      unlock(chosen_car->S4);
+  }
+  if(chosen_car->S5!=0){
+    unlock(chosen_car->S5);
+  }
+  if(chosen_car->S6!=0){
+    unlock(chosen_car->S6);
+  }
+  // reser car attribute to copy new car artibute
+  chosen_car->reset();
 }
 
 void unlock(short resource){
