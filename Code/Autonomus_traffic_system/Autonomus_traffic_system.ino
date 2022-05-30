@@ -59,25 +59,26 @@ void car::reset(){
   }
 
 // car class to create dummy car
-car* car1 = new car( 1,2,21,23,11,0,6,0,0,0);// dummy car
-car* car2 = new car( 2,3,21,23,0,0,8,0,7,10);// dummy car
-car* car3 = new car( 1,2,21,23,11,0,6,0,0,0);// dummy car
-car* car4 = new car( 2,3,21,23,0,0,8,0,7,10);// dummy car
-car* car5 = new car( 1,2,21,23,11,0,6,0,0,0);// dummy car
-car* car6 = new car( 2,3,21,23,0,0,8,0,7,10);// dummy car
-car* car7 = new car( 1,2,21,23,11,0,6,0,0,0);// dummy car
-car* car8 = new car( 2,3,21,23,0,0,8,0,7,10);// dummy car
-car* car9 = new car( 1,2,21,23,11,0,6,0,0,0);// dummy car
-car* car10 = new car( 2,3,21,23,0,0,8,0,7,10);// dummy car
-car* car11 = new car( 1,2,21,23,11,0,6,0,0,0);// dummy car
-car* car12 = new car( 2,3,21,23,0,0,8,0,7,10);// dummy car
-car* car13 = new car( 1,2,21,23,11,0,6,0,0,0);// dummy car
-car* car14 = new car( 2,3,21,23,0,0,8,0,7,10);// dummy car
-car* car15 = new car( 1,2,21,23,11,0,6,0,0,0);// dummy car
-car* car16 = new car( 2,3,21,23,0,0,8,0,7,10);// dummy car
+const car* car1 = new car( 1,2,21,23,11,0,6,0,0,0);// dummy car
+const car* car2 = new car( 2,3,21,23,0,0,8,0,7,10);// dummy car
+const car* car3 = new car( 3,2,21,23,11,0,6,0,0,0);// dummy car
+const car* car4 = new car( 4,3,21,23,0,0,8,0,7,10);// dummy car
+const car* car5 = new car( 5,2,21,23,11,0,6,0,0,0);// dummy car
+const car* car6 = new car( 6,3,21,23,0,0,8,0,7,10);// dummy car
+const car* car7 = new car( 7,2,21,23,11,0,6,0,0,0);// dummy car
+const car* car8 = new car( 8,3,21,23,0,0,8,0,7,10);// dummy car
+const car* car9 = new car( 9,2,21,23,11,0,6,0,0,0);// dummy car
+const car* car10 = new car( 10,3,21,23,0,0,8,0,7,10);// dummy car
+const car* car11 = new car( 11,2,21,23,11,0,6,0,0,0);// dummy car
+const car* car12 = new car( 12,3,21,23,0,0,8,0,7,10);// dummy car
+const car* car13 = new car( 13,2,21,23,11,0,6,0,0,0);// dummy car
+const car* car14 = new car( 14,3,21,23,0,0,8,0,7,10);// dummy car
+const car* car15 = new car( 15,2,21,23,11,0,6,0,0,0);// dummy car
+const car* car16 = new car( 16,3,21,23,0,0,8,0,7,10);// dummy car
+const car* car0 = new car( 0,0,0,0,0,0,0,0,0,0);// null car use for reset request array element
 
 // array for simulating requesting car
-car request_array[100];
+car* request_array[100];
 
 
 
@@ -100,6 +101,7 @@ SemaphoreHandle_t mutex9;
 SemaphoreHandle_t mutex10;
 SemaphoreHandle_t mutex11;
 SemaphoreHandle_t mutex12;
+SemaphoreHandle_t mutexRequest;
 
 // function prototype for resource manager
 void listesning();
@@ -134,25 +136,24 @@ void setup() {
   mutex10 = xSemaphoreCreateMutex();
   mutex11 = xSemaphoreCreateMutex();
   mutex12 = xSemaphoreCreateMutex();
-
-  Serial.println("Guard Ready"); 
+  mutexRequest = xSemaphoreCreateMutex();
 
   // initialize car queue  
   car_queue = xQueueCreate(QUEUE_SIZE, sizeof(car*));  
 
-  Serial.println("Queue Ready"); 
   // tasks
+  xTaskCreate(addRequest, "addRequest", STACK_SIZE_1280,1,1 , 0);
+  xTaskCreate(task_request_handler,"Handle_Request_From_Car",STACK_SIZE_128,0,1,0);
   xTaskCreate(resource_manager, "Task1", STACK_SIZE_128,1,1 , 0);
   xTaskCreate(resource_manager, "Task2", STACK_SIZE_128,1,1 , 0);
   xTaskCreate(resource_manager, "Task3", STACK_SIZE_128,1,1 , 0);
   xTaskCreate(resource_manager, "Task4", STACK_SIZE_128,1,1 , 0);
-  xTaskCreate(addRequest, "addRequest", STACK_SIZE_1280,1,1 , 0);
-  xTaskCreate(task_request_handler,"Handle_Request_From_Car",STACK_SIZE_128,0,1,0);
 
   // guard to add more car into queue
   pinMode(BUTTON,INPUT);
 
-  Serial.println("System Ready"); 
+  Serial.println("Starting..."); 
+  
 }
 
 /////////////////////////////////////////////////////////////// add dummy request ////////////////////////////////////////////////////////////////////
@@ -164,25 +165,29 @@ void addRequest(void *pvParameters){
   for(;;){
     while(!digitalRead(BUTTON)){
     }
-    Serial.println("adding new request car");
-    request_array[0]= *car1;
-    request_array[1]= *car2;
-    request_array[2]= *car3;
-    request_array[3]= *car4;
-    request_array[4]= *car5;
-    request_array[5]= *car6;
-    request_array[6]= *car7;
-    request_array[7]= *car8;
-    request_array[8]= *car9;
-    request_array[9]= *car10;
-    request_array[10]= *car11;
-    request_array[11]= *car12;
-    request_array[12]= *car13;
-    request_array[13]= *car14;
-    request_array[14]= *car15;
-    request_array[15]= *car16;
-    
-    vTaskDelay(500 / portTICK_PERIOD_MS);
+    if(xSemaphoreTake(mutexRequest,0) == pdTRUE){
+      Serial.println("adding new set of requesting car");
+      request_array[0]= car1;
+      request_array[1]= car2;
+      request_array[2]= car3;
+      request_array[3]= car4;
+      request_array[4]= car5;
+      request_array[5]= car6;
+      request_array[6]= car7;
+      request_array[7]= car8;
+      request_array[8]= car9;
+      request_array[9]= car10;
+      request_array[10]= car11;
+      request_array[11]= car12;
+      request_array[12]= car13;
+      request_array[13]= car14;
+      request_array[14]= car15;
+      request_array[15]= car16;
+      xSemaphoreGive(mutexRequest);
+      vTaskDelay( 1000/ portTICK_PERIOD_MS);
+      Serial.println(uxQueueSpacesAvailable(car_queue));
+    }
+  
   }
 }
 
@@ -190,62 +195,50 @@ void addRequest(void *pvParameters){
 /////////////////////////////////////////////////////////////// request handler //////////////////////////////////////////////////////////////////////
 void task_request_handler(void *pvParameters){
   (void) pvParameters;
-
+  Serial.println("handler"); 
   for (;;){
-    
-    
-    if( request_array[0].ID != 0 ){
-      
-      if(xSemaphoreTake(mutexQueue,0) == pdTRUE){
-        Serial.println("adding new car to queue");
-      xQueueSendToBack( car_queue,&request_array[0],(TickType_t ) 10 );
-      shift_array_left();
-      xSemaphoreGive(mutexQueue);
+    if(xSemaphoreTake(mutexRequest,0) == pdTRUE){
+      if( request_array[0]->ID != 0 ){
+        
+        if(xSemaphoreTake(mutexQueue,0) == pdTRUE){
+        xQueueSendToBack( car_queue,&request_array[0],(TickType_t ) 10 );
+        shift_array_left();
+        xSemaphoreGive(mutexQueue);
+        }
+        else{
+        }
       }
       else{
       }
+      xSemaphoreGive(mutexRequest);
     }
     
-    else{
-    }
     vTaskDelay(500 / portTICK_PERIOD_MS);    
   }
 }
 
 void shift_array_left(){
-  request_array[0].reset();
-  for(int i = 0; i < 100 ;i++){
-    if( request_array[i+1].ID != 0 ){
-      request_array[i] = request_array[i +1];
-    }
-    else{
-      request_array[i].reset();
-    }
-
-  }
-}
-
-void add_request(car *array_name, car car_object){
-  for(int i = 0; i < 100 ;i++){
-    if(sizeof(array_name[i]) != 0){
-      ;
-    }
-    else{
-      array_name[i] = car_object;
-    }
+  if( request_array[0]->ID != 0 ){
+      for(int i = 0; i < 100 ;i++){
+        if( request_array[i+1]->ID != 0 ){
+          request_array[i] = request_array[i +1];
+        }
+        else{
+          request_array[i] = car0 ;
+        }
+      }
   }
 }
 
 /////////////////////////////////////////////////////////////// resource manager //////////////////////////////////////////////////////////////////////
 void resource_manager(void *pvParameters){
-  Serial.println("new"); 
+  Serial.println("manager"); 
   car car_handler = car( 0,0,0,0,0,0,0,0,0,0);
   for (;;)
   {
     listesning();// check for requesting car on queue
     choose(&car_handler);// take car to handle
-    
-  Serial.println(car_handler.Duration); 
+    Serial.println(car_handler.ID); 
     checking(&car_handler);// lock requested resources
     allocate(&car_handler);// give permission to the car to use the resources
     reset(&car_handler);// unlock requested resources
