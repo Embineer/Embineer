@@ -1,0 +1,58 @@
+# Compile of request_handler.vhd failed with 1 errors.
+# Compile of request_handler.vhd failed with 1 errors.
+# Compile of request_handler.vhd failed with 1 errors.
+# Compile of request_handler.vhd failed with 4 errors.
+# Compile of request_handler.vhd failed with 1 errors.
+# Compile of request_handler.vhd failed with 1 errors.
+# Compile of request_handler.vhd failed with 1 errors.
+# Compile of request_handler.vhd was successful.
+vsim work.requesthandler(behavioral)
+# vsim work.requesthandler(behavioral) 
+# Start time: 22:18:41 on Jun 03,2022
+# Loading std.standard
+# Loading std.textio(body)
+# Loading ieee.std_logic_1164(body)
+# Loading work.requesthandler(behavioral)
+add wave -position insertpoint  \
+sim:/requesthandler/rst \
+sim:/requesthandler/clk \
+sim:/requesthandler/systemInput \
+sim:/requesthandler/data \
+sim:/requesthandler/systemOutput \
+sim:/requesthandler/current_state \
+sim:/requesthandler/next_state
+force -freeze sim:/requesthandler/rst 0 0
+force -freeze sim:/requesthandler/clk 1 0, 0 {50 ps} -r 100
+force -freeze sim:/requesthandler/data 10101010101010101010 0
+run
+run
+run
+run
+force -freeze sim:/requesthandler/systemInput 01 0
+run
+
+run
+run
+run
+run
+force -freeze sim:/requesthandler/systemInput 10 0
+run
+run
+run
+force -freeze sim:/requesthandler/systemInput 11 0
+run
+run
+run
+quit -sim
+# ** Error: Acs sdne.
+# 
+#        Unable to replace existing ini file (D:/Documents/GitHub/Embineer/vhdl implementation/request_handler.mpf).  File can not be renamed.
+# ** Error: Acs sdne.
+# 
+#        Unable to replace existing ini file (D:/Documents/GitHub/Embineer/vhdl implementation/request_handler.mpf).  File can not be renamed.
+# ** Error: Acs sdne.
+# 
+#        Unable to replace existing ini file (D:/Documents/GitHub/Embineer/vhdl implementation/request_handler.mpf).  File can not be renamed.
+# End time: 22:24:35 on Jun 03,2022, Elapsed time: 0:05:54
+# Errors: 3, Warnings: 12
+# Break key hit
