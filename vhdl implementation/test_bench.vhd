@@ -17,10 +17,10 @@ architecture behavioral of testBench is
 	     		systemOutput : out std_logic_vector(19 downto 0) ); 
 	end component;
 
-	signal rst_TB: std_logic; 
+	signal rst_TB: std_logic := '0'; 
 	signal clk_TB : std_logic := '0';
 	signal systemInput_TB : std_logic_vector(1 downto 0) := "00"; 
-	signal data_TB : std_logic_vector(19 downto 0);
+	signal data_TB : std_logic_vector(19 downto 0) := "10101010101010101010";
 	signal systemOutput_TB: std_logic_vector(19 downto 0);
 
 	begin
@@ -37,9 +37,11 @@ architecture behavioral of testBench is
 
 	sysInput:process(systemInput_TB)
 		begin
-   			systemInput_TB(0) <= not systemInput_TB(0) after 0.5 ns;
-			systemInput_TB(1) <= not systemInput_TB(1) after 1.0 ns;
+   			systemInput_TB(0) <= not systemInput_TB(0) after 1.0 ns;
+			systemInput_TB(1) <= not systemInput_TB(1) after 2.0 ns;
 	end process;
+
+	
 
 
 

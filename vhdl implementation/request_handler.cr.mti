@@ -1,9 +1,17 @@
-{D:/Documents/GitHub/Embineer/vhdl implementation/request_handler.vhd} {1 {vcom -work work -2002 -explicit -stats=none {D:/Documents/GitHub/Embineer/vhdl implementation/request_handler.vhd}
+{C:/Users/Acer/Documents/GitHub/Embineer/vhdl implementation/request_handler.vhd} {1 {vcom -work work -2002 -explicit -stats=none {C:/Users/Acer/Documents/GitHub/Embineer/vhdl implementation/request_handler.vhd}
 Model Technology ModelSim - Intel FPGA Edition vcom 2021.1 Compiler 2021.02 Feb  3 2021
 -- Loading package STANDARD
 -- Loading package TEXTIO
 -- Loading package std_logic_1164
 -- Compiling entity requestHandler
 -- Compiling architecture behavioral of requestHandler
+
+} {} {}} {C:/Users/Acer/Documents/GitHub/Embineer/vhdl implementation/test_bench.vhd} {1 {vcom -work work -2002 -explicit -stats=none {C:/Users/Acer/Documents/GitHub/Embineer/vhdl implementation/test_bench.vhd}
+Model Technology ModelSim - Intel FPGA Edition vcom 2021.1 Compiler 2021.02 Feb  3 2021
+-- Loading package STANDARD
+-- Loading package TEXTIO
+-- Loading package std_logic_1164
+-- Compiling entity testBench
+-- Compiling architecture behavioral of testBench
 
 } {} {}}
