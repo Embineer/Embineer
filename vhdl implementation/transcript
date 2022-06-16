@@ -1,0 +1,38 @@
+# Compile of request_handler.vhd was successful.
+# Compile of test_bench.vhd was successful.
+# 2 compiles, 0 failed with no errors.
+vsim work.testbench
+# vsim work.testbench 
+# Start time: 18:23:43 on Jun 16,2022
+# Loading std.standard
+# Loading std.textio(body)
+# Loading ieee.std_logic_1164(body)
+# Loading work.testbench(behavioral)
+# Loading work.requesthandler(behavioral)
+add wave -position insertpoint  \
+sim:/testbench/clk_TB \
+sim:/testbench/data_TB \
+sim:/testbench/rst_TB \
+sim:/testbench/systemInput_TB \
+sim:/testbench/systemOutput_TB
+# ** Warning: (vsim-WLF-5000) WLF file currently in use: vsim.wlf
+#           File in use by: sheik  Hostname: SHEIKH-SURFACE  ProcessID: 13420
+#           Attempting to use alternate WLF file "./wlftkjiydv".
+# ** Warning: (vsim-WLF-5001) Could not open WLF file: vsim.wlf
+#           Using alternate file: ./wlftkjiydv
+run
+run
+run
+run
+run
+run
+run
+run
+# ** Error: Acs sdne.
+# 
+#        Unable to replace existing ini file (D:/Documents/GitHub/Embineer/vhdl implementation/request_handler.mpf).  File can not be renamed.
+# ** Error: Acs sdne.
+# 
+#        Unable to replace existing ini file (D:/Documents/GitHub/Embineer/vhdl implementation/request_handler.mpf).  File can not be renamed.
+# End time: 18:25:34 on Jun 16,2022, Elapsed time: 0:01:51
+# Errors: 2, Warnings: 4

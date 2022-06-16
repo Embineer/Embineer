@@ -2,8 +2,11 @@ Library IEEE;
 USE IEEE.std_logic_1164.all;
 
 entity requestHandler is
-	port(rst, clk: in std_logic; systemInput : in std_logic_vector(1 downto 0); data : in std_logic_vector(19 downto 0);
-	     systemOutput : out std_logic_vector(19 downto 0) ); 
+	port(	rst, clk: in std_logic; 
+		systemInput : in std_logic_vector(1 downto 0); 
+		data : in std_logic_vector(19 downto 0);
+	     	systemOutput : out std_logic_vector(19 downto 0) 
+	); 
 end entity requestHandler;
 
 architecture behavioral of requestHandler is
